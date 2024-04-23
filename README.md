@@ -1,19 +1,19 @@
 # Korg Logue Reverse Echo Delay FX
 
->Reverses and repeats an audio sample
+>Echos reversed audio input
 
 ## Functionality
 
 |Knob|Function|
 |-|-|
-|A|Sets the length (0 - 2 seconds) of the audio to reverse before resetting|
-|B|TODO: Set echo length|
+|A|Sets the length (0 - 2 seconds) of the audio to be echoed|
+|B|TODO: Set trailing echo length|
 
-Please report any bugs or issues you might encounter and I'll try to resolve them as time permits!
+This is in active development and most likely will drastically change before an official release.
 
 ## Status
 
-> Version 1.0
+> In Development
 
 |Logue|Tested|Status|
 |-|-|-|
