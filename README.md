@@ -8,7 +8,7 @@
 |-|-|
 |A|Sets the length (0 - 2 seconds) of the audio to be echoed|
 |B|TODO: Set length (Currently sets trailing echo length)|
-|Shift B|TODO: Sets trailing echo length|
+|Shift B|TODO: Set trailing echo length|
 
 ⚠️ - This is in active development and most likely will drastically change before an official release.
 
