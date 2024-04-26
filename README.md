@@ -6,21 +6,19 @@
 
 |Knob|Function|
 |-|-|
-|A|Sets the length (0 - 2 seconds) of the audio to be echoed|
-|B|TODO: Set length (Currently sets trailing echo length)|
-|Shift B|TODO: Set trailing echo length|
+|A|Sets the length (1 - 2 seconds) of the audio to reverse|
+|B|Sets trailing echo length|
+|Shift B|Wet/Dry Mix|
 
-⚠️ - This is in active development and most likely will drastically change before an official release.
-
-⚠️ - Memory can be corrupted, leading to loud pops. Use Caution when testing.
+⚠️ - Use Caution when testing. I did my best to manage the memory but C++ is a footgun language and so: memory can be corrupted, leading to loud pops. 
 
 ## Status
 
-> In Development
+> Version 1.0
 
 |Logue|Tested|Status|
 |-|-|-|
-|NTS-1|Yes|In Development|
+|NTS-1|In Progress|So far, so good!|
 |NTS-1 mkII|No|Needs Testing|
 |NTS-3|No|Needs Testing|
 |minilogue xd|No|Needs Testing|
