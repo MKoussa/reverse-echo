@@ -10,18 +10,15 @@
 |B|Sets trailing echo length|
 |Shift B|Wet/Dry Mix|
 
-⚠️ - Use Caution when testing. I did my best to manage the memory but C++ is a footgun language and so: memory can be corrupted, leading to loud pops. 
-
-TODO
-Find a way to smooth out transition of loop restart.
+TODO: Find a better way to mix audio.
 
 ## Status
 
-> Version 1.0
+> Version 2.0
 
 |Logue|Tested|Status|
 |-|-|-|
-|NTS-1|In Progress|Testing|
+|NTS-1|Yes|Working|
 |NTS-1 mkII|No|Needs Testing|
 |NTS-3|No|Needs Testing|
 |minilogue xd|No|Needs Testing|
