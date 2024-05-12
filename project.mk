@@ -4,9 +4,9 @@
 
 PROJECT = reverse-echo
 
-UCSRC = main.c
+UCSRC = 
 
-UCXXSRC =
+UCXXSRC = reverse-echo.cpp
 
 UINCDIR =
 

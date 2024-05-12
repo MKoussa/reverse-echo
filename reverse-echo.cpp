@@ -1,14 +1,18 @@
 #include "userdelfx.h"
 #include "buffer_ops.h"
+#include <atomic>
 
 #define BUFFER_LEN 48000 * 4
 #define BUFFER_LEN_HALF 48000
 
 static __sdram float s_delay_ram[BUFFER_LEN];
 
-static uint8_t timeChange, depthChange; 
-static float depth, depthVal, depthDiv, wetDry, wetDryDiv;
-static uint32_t echoCount, echoMax, echoMaxVal;
+static bool timeChange, depthChange, wetDryChange;
+
+static float depth, depthDiv, wetDryDiv, depthVal, wetDry, wetDryVal;
+
+static uint32_t echoCount, echoMax;
+static std::atomic<uint32_t> echoMaxVal(0);
 
 void DELFX_INIT(uint32_t platform, uint32_t api)
 {
@@ -19,21 +23,16 @@ void DELFX_INIT(uint32_t platform, uint32_t api)
   wetDry = 0.0f;
   echoMax = 0;
   //
-  depthDiv = 0.0f;
-  wetDryDiv = 0.0f;
+  depthDiv = 0.99f + depth;
+  wetDryDiv = 1.0f + wetDry;
   //
-  depthVal = 0;
+  depthVal = 0.0f;
   echoMaxVal = 0;
-  //
-  timeChange = 0;
-  depthChange = 0;
+  wetDryVal = 0.0f;
 }
 
 void DELFX_PROCESS(float *xn, uint32_t frames)
-{
-  depthDiv = 0.99f + depth;
-  wetDryDiv = 1.0f + wetDry;
-  
+{  
   for(uint32_t i = 0; i < frames; i++)
   {
     s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / (0.99 + depth);   
@@ -51,20 +50,30 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
     }
 
     echoCount++;
-    if(echoCount > echoMax) { echoCount = 0; }
-  }
+    if(echoCount > echoMax)
+    { 
+        echoCount = 0;        
+        if(timeChange)
+        {
+            echoMax = echoMaxVal;
+            timeChange = false;
+        }
 
-  if(timeChange == 1)
-  {
-    echoMax = echoMaxVal;
-    timeChange = 0;
-  }
+        if(depthChange)
+        {
+            depth = depthVal;
+            echoCount = 0;
+            depthDiv = 0.99f + depth;
+            depthChange = false;
+        }
 
-  if(depthChange == 1)
-  {
-    depth = depthVal;
-    depthChange = 0;
-    echoCount = 0;
+        if(wetDryChange)
+        {
+            wetDry = wetDryVal;
+            wetDryDiv = 1.0f + wetDry;
+            wetDryChange = false;
+        }
+    }
   }
 }
 
@@ -74,15 +83,16 @@ void DELFX_PARAM(uint8_t index, int32_t value)
   switch (index) 
   {
     case k_user_delfx_param_time:
-      timeChange = 1;
       echoMaxVal = ((uint32_t)(valf * BUFFER_LEN_HALF)) + 48000;
+      timeChange = true;
       break;
     case k_user_delfx_param_depth:
-      depthChange = 1;
       depthVal = valf;
+      depthChange = true;
       break;
     case k_user_delfx_param_shift_depth:
-      wetDry = valf;
+      wetDryVal = valf;
+      wetDryChange = true;
       break;
     default:
       break;
