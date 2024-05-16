@@ -35,8 +35,38 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
 {  
   for(uint32_t i = 0; i < frames; i++)
   {
-    s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / (0.99 + depth);   
-    s_delay_ram[echoCount * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) / (0.99 + depth);
+    if(echoCount > echoMax)
+    { 
+      echoCount = 0;        
+      if(timeChange)
+      {
+          echoMax = echoMaxVal;
+          timeChange = false;
+      }
+
+      if(depthChange)
+      {
+          depth = depthVal;
+          echoCount = 0;
+          depthDiv = 0.99f + depth;
+          depthChange = false;
+      }
+
+      if(wetDryChange)
+      {
+          wetDry = wetDryVal;
+          wetDryDiv = 1.0f + wetDry;
+          wetDryChange = false;
+      }
+    
+      s_delay_ram[echoCount * 2]     = ((xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) * 0.5) + (s_delay_ram[(echoMax * 2)]     * 0.5) / (0.99 + depth);   
+      s_delay_ram[echoCount * 2 + 1] = ((xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) * 0.5) + (s_delay_ram[(echoMax * 2 + 1)] * 0.5) / (0.99 + depth);
+    }
+    else
+    {
+      s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / (0.99 + depth);   
+      s_delay_ram[echoCount * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) / (0.99 + depth);
+    }
 
     if(wetDry > 0)
     {
@@ -50,30 +80,6 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
     }
 
     echoCount++;
-    if(echoCount > echoMax)
-    { 
-        echoCount = 0;        
-        if(timeChange)
-        {
-            echoMax = echoMaxVal;
-            timeChange = false;
-        }
-
-        if(depthChange)
-        {
-            depth = depthVal;
-            echoCount = 0;
-            depthDiv = 0.99f + depth;
-            depthChange = false;
-        }
-
-        if(wetDryChange)
-        {
-            wetDry = wetDryVal;
-            wetDryDiv = 1.0f + wetDry;
-            wetDryChange = false;
-        }
-    }
   }
 }
 
