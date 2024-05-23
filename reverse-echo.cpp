@@ -7,7 +7,7 @@
 
 static __sdram float s_delay_ram[BUFFER_LEN];
 
-static bool timeChange, depthChange, wetDryChange;
+static bool depthChange, wetDryChange;
 
 static float depth, depthMath, wetDryMath, depthVal, wetDry, wetDryVal;
 
@@ -38,11 +38,7 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
     if(echoCount > echoMax)
     { 
       echoCount = 0;        
-      if(timeChange)
-      {
-          echoMax = echoMaxVal;
-          timeChange = false;
-      }
+      echoMax = echoMaxVal;
     }
     s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / depthMath;   
     s_delay_ram[echoCount * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) / depthMath;
@@ -82,7 +78,6 @@ void DELFX_PARAM(uint8_t index, int32_t value)
   {
     case k_user_delfx_param_time:
       echoMaxVal = ((uint32_t)(valf * BUFFER_LEN_HALF)) + 48000;
-      timeChange = true;
       break;
     case k_user_delfx_param_depth:
       depthVal = valf;
