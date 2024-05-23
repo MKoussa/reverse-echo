@@ -9,7 +9,7 @@ static __sdram float s_delay_ram[BUFFER_LEN];
 
 static bool timeChange, depthChange, wetDryChange;
 
-static float depth, depthDiv, wetDryDiv, depthVal, wetDry, wetDryVal;
+static float depth, depthMath, wetDryMath, depthVal, wetDry, wetDryVal;
 
 static uint32_t echoCount, echoMax;
 static std::atomic<uint32_t> echoMaxVal(0);
@@ -23,8 +23,8 @@ void DELFX_INIT(uint32_t platform, uint32_t api)
   wetDry = 0.0f;
   echoMax = 0;
   //
-  depthDiv = 0.99f + depth;
-  wetDryDiv = 1.0f + wetDry;
+  depthMath = 0.99f;
+  wetDryMath = 1.0f;
   //
   depthVal = 0.0f;
   echoMaxVal = 0;
@@ -43,35 +43,14 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
           echoMax = echoMaxVal;
           timeChange = false;
       }
-
-      if(depthChange)
-      {
-          depth = depthVal;
-          echoCount = 0;
-          depthDiv = 0.99f + depth;
-          depthChange = false;
-      }
-
-      if(wetDryChange)
-      {
-          wetDry = wetDryVal;
-          wetDryDiv = 1.0f + wetDry;
-          wetDryChange = false;
-      }
+    }
+    s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / depthMath;   
+    s_delay_ram[echoCount * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) / depthMath;
     
-      s_delay_ram[echoCount * 2]     = ((xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) * 0.5) + (s_delay_ram[(echoMax * 2)]     * 0.5) / (0.99 + depth);   
-      s_delay_ram[echoCount * 2 + 1] = ((xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) * 0.5) + (s_delay_ram[(echoMax * 2 + 1)] * 0.5) / (0.99 + depth);
-    }
-    else
-    {
-      s_delay_ram[echoCount * 2]     = (xn[i * 2]     + (s_delay_ram[echoCount * 2]     * depth)) / (0.99 + depth);   
-      s_delay_ram[echoCount * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[echoCount * 2 + 1] * depth)) / (0.99 + depth);
-    }
-
     if(wetDry > 0)
-    {
-      xn[i * 2]     = (xn[i * 2]     + (s_delay_ram[(echoMax * 2)     - (echoCount * 2)]     * wetDry)) / (wetDryDiv);
-      xn[i * 2 + 1] = (xn[i * 2 + 1] + (s_delay_ram[(echoMax * 2 + 1) - (echoCount * 2 + 1)] * wetDry)) / (wetDryDiv);
+    {     
+      xn[i * 2]     = (xn[i * 2]     * wetDryMath) + (s_delay_ram[(echoMax * 2)     - (echoCount * 2)]     * wetDry);
+      xn[i * 2 + 1] = (xn[i * 2 + 1] * wetDryMath) + (s_delay_ram[(echoMax * 2 + 1) - (echoCount * 2 + 1)] * wetDry);
     }
     else
     {
@@ -80,6 +59,19 @@ void DELFX_PROCESS(float *xn, uint32_t frames)
     }
 
     echoCount++;
+    if(depthChange)
+    {
+        depth = depthVal;
+        depthMath = 0.99f + depth;
+        depthChange = false;
+    }
+
+    if(wetDryChange)
+    {
+        wetDry = wetDryVal;
+        wetDryMath = 1.0f - wetDry;
+        wetDryChange = false;
+    }
   }
 }
 
